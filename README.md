@@ -22,38 +22,75 @@ RegisterNumber: 212225040011
 */
 ```
 ```
+import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
-data = pd.read_csv("diabetes.csv")
-X = data.drop("Outcome", axis=1)
-y = data["Outcome"]
+# Load data
+data = pd.read_csv("Placement_Data.csv")
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+# Convert Placed / Not Placed to 1 / 0
+data['status'] = data['status'].map({'Placed': 1, 'Not Placed': 0})
 
+# Take only 2 features (simple)
+X = data[['ssc_p', 'mba_p']].values
+y = data['status'].values
+
+# -----------------------------
+# Standard Scaler (Normalization)
+# -----------------------------
 scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+X = scaler.fit_transform(X)
 
-model = LogisticRegression()
-model.fit(X_train, y_train)
+# Add bias column (1)
+m = len(y)
+X = np.c_[np.ones(m), X]
 
-y_pred = model.predict(X_test)
+# Sigmoid function
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
-print("\nClassification Report: \n", classification_report(y_test, y_pred))
+# Cost function
+def cost_function(X, y, theta):
+    h = sigmoid(X @ theta)
+    return (-1/m) * np.sum(y*np.log(h) + (1-y)*np.log(1-h))
+
+# Gradient Descent
+theta = np.zeros(X.shape[1])
+alpha = 0.1
+cost_history = []
+
+for i in range(500):
+    z = X @ theta
+    h = sigmoid(z)
+    gradient = (1/m) * X.T @ (h - y)
+    theta = theta - alpha * gradient
+    
+    cost = cost_function(X, y, theta)
+    cost_history.append(cost)
+
+# Prediction
+y_pred = (sigmoid(X @ theta) >= 0.5).astype(int)
+
+# Accuracy
+accuracy = np.mean(y_pred == y) * 100
+print("Weights:", theta)
+print("Accuracy:", accuracy, "%")
+
+# -----------------------------
+# PLOT: Cost vs Iterations
+# -----------------------------
+plt.figure()
+plt.plot(cost_history)
+plt.xlabel("Iterations")
+plt.ylabel("Cost")
+plt.title("Logistic Regression using Gradient Descent")
+plt.show()
 ```
 
 ## Output:
-
-<img width="1421" height="358" alt="ML-EX-6" src="https://github.com/user-attachments/assets/b77f28a2-6b05-47bb-a3fc-a7b22c15c8df" />
-
+<img width="1379" height="642" alt="ML-EX-6" src="https://github.com/user-attachments/assets/be6da9b5-3083-465e-849a-debcb26794e1" />
 
 
 ## Result:
