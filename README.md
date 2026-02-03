@@ -52,6 +52,8 @@ print("\nClassification Report: \n", classification_report(y_test, y_pred))
 
 ## Output:
 
+<img width="1421" height="358" alt="ML-EX-6" src="https://github.com/user-attachments/assets/b77f28a2-6b05-47bb-a3fc-a7b22c15c8df" />
+
 
 
 ## Result:
